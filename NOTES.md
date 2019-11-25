@@ -54,6 +54,12 @@ Para sair do gdb, fazemos
 		(gdb) quit
 		(gdb) y
 
+###Verificar memory leaks
+
+Utilizar valgrid
+
+		$ valgrind [progName] [args]
+
 ##Código dado
 
 ###Erros propositados
