@@ -27,5 +27,37 @@ Ao criar linked list, em vez de alocar memória só para essa, alocar para vári
 
 Implementar com árvore binária ordenada.
 
+###Fazer debug
+
+Compilar o ficheiro com o comando
+
+		$ cc -Wall -f file.c -o file -lm
+
+Usar o gdb para fazer debug, correndo os seguintes comandos
+
+		$ gdb file
+
+		(gdb) break *functiona
+
+		(gdb) run [args]
+
+Assim vamos ter acesso aos valores das variáveis aquando do breaking point, com o seguinte comando:
+
+		(gdb) p [varName]
+
+A partir do breaking point, para correr linha a linha, corre-se o comando
+
+		(gdb) step [nLinhas]
+
+Para sair do gdb, fazemos
+
+		(gdb) quit
+		(gdb) y
+
+##Código dado
+
+###Erros propositados
+Programa que conta palavras está errado!
+
 ##Referências
 https://www.youtube.com/watch?v=T9gct6Dx-jo
