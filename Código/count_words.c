@@ -55,6 +55,8 @@ static void free_tree(node *n)
   {
     free_tree(n->left);
     free_tree(n->right);
+    //free_tree(n->count); ???
+    //free_tree(n->word);  ???
     free(n);
   }
 }
@@ -75,9 +77,17 @@ static long count_different_words(node *n)
 
 static void list_words(node *n)
 {
-  list_words(n->left);
-  printf("%6ld %s\n",n->count,n->word);
-  list_words(n->right);
+  if (n != NULL){   // ALTERADO: condição de paragem para quando o ponteiro for nulo, de modo a que não tente aceder a memória fora da reservada para o programa 
+    list_words(n->left);
+    printf("%6ld %s\n",n->count,n->word);
+    list_words(n->right);
+  }else
+  {
+  //  free_tree(n);
+  //  free_tree(n->count);
+  //  free_tree(n->word)
+  }
+  
 }
 
 //
@@ -100,7 +110,7 @@ int main(int argc,char **argv)
     fprintf(stderr,"\e[0m"); // normal output
     return 1;
   }
-  for(int i = 2;i <= argc;i++)
+  for(int i = 2;i < argc;i++) //ALTERADO: i tem q ser menor q nº de argumentos
   {
     // read text file
     FILE *fp = fopen(argv[i],"r");
