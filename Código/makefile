@@ -12,5 +12,5 @@ all:		binary_search count_words primes
 count_words:	count_words.c
 	cc -Wall -g count_words.c -o count_words
 
-hashtable: hashtable.c
-	cc -Wall -g hashtable.c -o hashtable
+hashTable: hashTable.c
+	cc -Wall -g hashTable.c -o hashTable
