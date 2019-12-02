@@ -6,6 +6,7 @@
 
 #define SIZE 20
 
+// Data item implementation
 typedef struct dataItem
 {
 	char *key;
@@ -17,6 +18,7 @@ typedef struct dataItem
 	int minDistance;
 } dataItem;
 
+//Linked list implementation
 typedef struct linkedList
 {
 	struct linkedList *prev;
@@ -35,8 +37,8 @@ linkedList *addLinkedList(dataItem *d, linkedList *root)
 	{
 		l->prev = root->prev; //root->prev points to the last element of the linked list (lets say last)
 		root->prev->next = l; //the last->next element will be the element that is being added
-		root->prev = l; //the element being added is the last element now, so the root->prev
-		//l->next=NULL;
+		root->prev = l;		  //the element being added is the last element now, so the root->prev
+							  //l->next=NULL;
 	}
 	l->data = d;
 	return l;
@@ -54,11 +56,40 @@ void showLinkedList(linkedList *link)
 	}
 }
 
+//HashTable implementation
+typedef struct hashTable
+{
+	struct linkedList; //Array
+	int addedElements; //Count the elements added
+} hashTable;
+
+void *addHashTable(char *key, hashTable *hash)
+{
+	//TODO
+}
+
+unsigned int hash_function(const char *str, unsigned int s)
+{ //returns the hashcode of *str between 0 and s
+	static unsigned int table[256];
+	unsigned int crc, i, j;
+	if (table[1] == 0u) // do we need to initialize the table[] array?
+		for (i = 0u; i < 256u; i++)
+			for (table[i] = i, j = 0u; j < 8u; j++)
+				if (table[i] & 1u)
+					table[i] = (table[i] >> 1) ^ 0xAED0AED0AED0011Full; // "magic" constant
+				else
+					table[i] >>= 1;
+	crc = 0xAED02019u; // initial value (chosen arbitrarily)
+	while (*str != '\0')
+		crc = (crc >> 8) ^ table[crc & 0xFFu] ^ ((unsigned int)*str++ << 24);
+	return crc % s;
+}
+
 int main()
 {
 
 	printf("Testing linked list implementation...\n");
-	
+
 	dataItem *d1 = malloc(sizeof(dataItem));
 	d1->key = "Teste1";
 	linkedList *l1 = addLinkedList(d1, NULL);
@@ -78,10 +109,10 @@ int main()
 	linkedList *l = l1;
 	while (l != NULL)
 	{
-		if(l->next!=NULL)
-			assert(l->next->prev==l);
-		if(l->prev->next!=NULL)
-			assert(l->prev->next==l);
+		if (l->next != NULL)
+			assert(l->next->prev == l);
+		if (l->prev->next != NULL)
+			assert(l->prev->next == l);
 		l = l->next;
 	}
 	printf("All tests passed!\n");
