@@ -54,6 +54,7 @@ typedef struct linkedList
 
 linkedList *createLinkedList(char *key, int index)
 {
+	printf("\tcreateLinkedList (%s,%d)\n", key, index);
 	//inicialize dataItem
 	dataItem *d = malloc(sizeof(dataItem));
 	d->counter = 1;
@@ -63,22 +64,26 @@ linkedList *createLinkedList(char *key, int index)
 	d->maxDistance = 0;
 	d->minDistance = 10000000;
 	d->sumIndex = index;
+	showDataItem(d);
 	//create linkedList with dataItem
 	linkedList *l = malloc(sizeof(linkedList));
 	l->prev = l; //when there are only one elemnent of the list, it is the first and the last (so the l->prev)
 	l->data = d;
+	printf("\t\tcreated linkedList at %p\n", l);
 	return l;
 }
 
 void addLinkedList(char *key, int index, linkedList *root)
 {
+	printf("\taddlinkedList (%s,%d,%p)\n", key, index, root);
 	linkedList *analising = root;
 
 	//check for dataItem with the same key at the linked list
 	bool similar = false; //true if exists dataItem with the same key, at the end of the while cycle
-	while (analising->next != NULL)
+	do
 	{
-		if (strcmp(analising->data->key, key) == 0) //if keys are equal
+		printf("\t\tcomparing %s with %s, obtaining %d\n", analising->data->key, key, strcasecmp(analising->data->key, key));
+		if (strcasecmp(analising->data->key, key) == 0) //if keys are equal
 		{
 			similar = true;
 			break;
@@ -87,7 +92,10 @@ void addLinkedList(char *key, int index, linkedList *root)
 		{
 			analising = analising->next;
 		}
-	}
+
+	} while (analising != NULL);
+
+	printf("\t\tsimilar %d\n",similar);
 
 	//if the key already exists, update properties, otherwise, create a new node to the linkedList
 	if (similar)
@@ -144,7 +152,7 @@ dataItem *getLinkedList(char *key, linkedList *link)
 //HashTable implementation
 typedef struct hashTable
 {
-	linkedList **table; //Array
+	int *table; //Array
 	int size;			//Array size
 	int addedElements;  //Count the elements added
 	int maxElements;	//Maximum element to add
@@ -153,7 +161,7 @@ typedef struct hashTable
 hashTable *createHashTable(int size)
 {
 	hashTable *ht = malloc(sizeof(hashTable));
-	ht->table = malloc(sizeof(linkedList) * size); //Create table;
+	ht->table = malloc(sizeof(int)*size); //Create table;
 	ht->size = size;
 	ht->addedElements = 0;
 	int m = size * log(2);
@@ -161,8 +169,9 @@ hashTable *createHashTable(int size)
 	return ht;
 }
 
-void addHashTable(char *key, int index, hashTable *hash)
+void addHashTable(char *key, int keyIndex, hashTable *hash)
 {
+	printf("\taddHashTable (%s,%d,%p)\n", key, keyIndex, hash);
 	if (hash->maxElements == hash->addedElements)
 	{
 		//doubleHashTable(hash);
@@ -171,15 +180,18 @@ void addHashTable(char *key, int index, hashTable *hash)
 	else
 	{
 		int index = hash_function(key, hash->size); //Compute index of the key
+		printf("\t\thashIndex %d\n",index);
 		if (hash->table[index] == NULL)				//Create linked list
 		{
-			hash->table[index] = createLinkedList(key, index);
-			printf("Created linkedList at index %d (root %p), that has a prev of %p with %s\n", index, &hash->table[index], hash->table[index]->prev,key);
+			hash->table[index] = createLinkedList(key, keyIndex);
+			linkedList *temp; 
+			temp= hash->table[index];
+			printf("Creating linkedList at index %d (root %p), that has a prev of %p with %s...\n", index, hash->table[index], *temp->prev, key);
 		}
 		else //Add element to linked list
 		{
-			addLinkedList(key, index, hash->table[index]);
-			printf("Added (%s) element to linkedList at index %d\n", key, index);
+			printf("Adding (%s) element to linkedList at index %d...\n", key, index);
+			addLinkedList(key, keyIndex, hash->table[index]);
 		}
 	}
 }
@@ -253,9 +265,12 @@ int main()
 
 	printf("Created hash table (at memory position %p) with a length of %d that can carry up to %d elements, before being resized.\n", ht, ht->size, ht->maxElements);
 
-	addHashTable("Primeira chave", 0, ht);
-	addHashTable("Segunda chave", 1, ht);
-	addHashTable("Primeira chave", 5, ht);
+	printf("Adding %s found at index %d...\n", "Primeira chave", 4);
+	addHashTable("Primeira chave", 4, ht);
+	printf("Adding %s found at index %d...\n", "Segunda chave", 10);
+	addHashTable("Segunda chave", 10, ht);
+	printf("Adding %s found at index %d...\n", "Primeira chave", 98);
+	addHashTable("Primeira chave", 98, ht);
 
 	showHashTable(ht);
 
