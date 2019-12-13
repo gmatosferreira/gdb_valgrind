@@ -64,6 +64,7 @@ linkedList *createLinkedList(char *key, int index)
 	d->maxDistance = 0;
 	d->minDistance = 10000000;
 	d->sumIndex = index;
+	printf("\t\t");
 	showDataItem(d);
 	//create linkedList with dataItem
 	linkedList *l = malloc(sizeof(linkedList));
@@ -73,7 +74,7 @@ linkedList *createLinkedList(char *key, int index)
 	return l;
 }
 
-void addLinkedList(char *key, int index, linkedList *root)
+int addLinkedList(char *key, int index, linkedList *root)
 {
 	printf("\taddlinkedList (%s,%d,%p)\n", key, index, root);
 	linkedList *analising = root;
@@ -104,14 +105,15 @@ void addLinkedList(char *key, int index, linkedList *root)
 		int distance = index - analising->data->lastIndex; //compute distance from last index
 		//update min and max distances
 		if (analising->data->minDistance > distance)
-		{
 			analising->data->minDistance = distance;
-		}
 		if (analising->data->maxDistance < distance)
-		{
 			analising->data->maxDistance = distance;
-		}
-		analising->data->lastIndex = index; //change last index
+		if(analising->data->lastIndex<index)
+			analising->data->lastIndex = index; //change last index
+		if(analising->data->firstIndex>index)
+			analising->data->firstIndex = index; //change first index
+		printf("\t\tUpdated at linkedlist \t");
+		showDataItem(analising->data);
 	}
 	else
 	{
@@ -120,7 +122,12 @@ void addLinkedList(char *key, int index, linkedList *root)
 		root->prev->next = l; //the last->next element will be the element that is being added
 		root->prev = l;		  //the element being added is the last element now, so the root->prev
 							  //l->next=NULL;
+		printf("\t\tAdded to linkedlist \t");
+		showDataItem(l->data);
 	}
+
+	return similar; //Returns 1 if key already existed and updated, and 0 if it didn't and a new node was created
+
 }
 
 void showLinkedList(linkedList *link)
@@ -152,7 +159,7 @@ dataItem *getLinkedList(char *key, linkedList *link)
 //HashTable implementation
 typedef struct hashTable
 {
-	int *table; //Array
+	int **table; //Array
 	int size;			//Array size
 	int addedElements;  //Count the elements added
 	int maxElements;	//Maximum element to add
@@ -161,7 +168,7 @@ typedef struct hashTable
 hashTable *createHashTable(int size)
 {
 	hashTable *ht = malloc(sizeof(hashTable));
-	ht->table = malloc(sizeof(int)*size); //Create table;
+	ht->table = malloc(sizeof(int*)*size); //Create table;
 	ht->size = size;
 	ht->addedElements = 0;
 	int m = size * log(2);
@@ -174,30 +181,36 @@ void addHashTable(char *key, int keyIndex, hashTable *hash)
 	printf("\taddHashTable (%s,%d,%p)\n", key, keyIndex, hash);
 	if (hash->maxElements == hash->addedElements)
 	{
+		printf("\tDoubling the size of the hashTable...\n");
 		//doubleHashTable(hash);
-		printf("Doubling the size of the hashTable...\n");
+
 	}
 	else
 	{
 		int index = hash_function(key, hash->size); //Compute index of the key
 		printf("\t\thashIndex %d\n",index);
+		printf("\t\tThis index points to %p \n",hash->table[index]);
 		if (hash->table[index] == NULL)				//Create linked list
 		{
-			hash->table[index] = createLinkedList(key, keyIndex);
-			linkedList *temp; 
-			temp= hash->table[index];
-			printf("Creating linkedList at index %d (root %p), that has a prev of %p with %s...\n", index, hash->table[index], *temp->prev, key);
+			printf("\t\tThere is no linkedList at this index yet! Creating a new one...\n");
+			hash->table[index]=createLinkedList(key, keyIndex);
+			linkedList *temp = hash->table[index];
+			printf("\tLinkedlist %p\n",temp);
+			printf("\tCreated linkedList at index %d (root %p), that has a prev of %p with %s...\n", index, hash->table[index],temp->prev , key);
+			hash->addedElements++;
 		}
 		else //Add element to linked list
 		{
-			printf("Adding (%s) element to linkedList at index %d...\n", key, index);
-			addLinkedList(key, keyIndex, hash->table[index]);
+			printf("\tAdded (%s) element to linkedList at index %d...\n", key, index);
+			int updatedElement = addLinkedList(key, keyIndex, hash->table[index]);
+			if(!updatedElement)
+				hash->addedElements++;
 		}
 	}
 }
 
 //hashTable* doubleHashTable(hashTable *hash){
-
+	
 //}
 
 dataItem *getHashTable(char *key, hashTable *hash)
@@ -216,10 +229,10 @@ dataItem *getHashTable(char *key, hashTable *hash)
 
 void showHashTable(hashTable *ht)
 {
-	printf("Showing hashTable stored at memory position %p...\n", ht);
+	printf("Showing hashTable stored at memory position %p, with size %d, %d added elements out of %d (max)...\n", ht, ht->size, ht->addedElements, ht->maxElements);
 	for (int i = 0; i < ht->size; i++)
 	{
-		printf("%d: ", i);
+		printf("%d (%p): ", i, ht->table[i]);
 		if (ht->table[i] == NULL)
 		{
 			printf("Not used yet\n");
@@ -276,8 +289,28 @@ int main()
 
 	printf("Checking for existance of 'Primeira chave'...\n");
 	showDataItem(getHashTable("Primeira chave", ht));
+	assert(getHashTable("Primeira chave", ht)!=NULL);
 	printf("Checking for existance of 'Primeira chave'...\n");
 	showDataItem(getHashTable("Segunda chave", ht));
+	assert(getHashTable("Segunda chave", ht)!=NULL);
 	printf("Checking for existance of 'Terceira chave'...\n");
 	showDataItem(getHashTable("Teceira chave", ht));
+	assert(getHashTable("Teceira chave", ht)==NULL);
+
+	printf("All tests passed!\n");
+
+	//Test to HASHTABLE RESIZE
+	printf("\nTesting hashTable RESIZE implementation... (NOT IMPLEMENTED YET!)\n");
+
+	printf("Adding 5 more elements to the hashTable (Quarta, Quinta ... Oitava Chave)...\n");
+	addHashTable("Quarta chave", 14, ht);
+	addHashTable("Quinta chave", 25, ht);
+	addHashTable("Sexta chave", 36, ht);
+	addHashTable("Sétima chave", 47, ht);
+	addHashTable("Oitava chave", 58, ht);
+
+
+
+
+	printf("\nThe program has finished!\n");
 }
