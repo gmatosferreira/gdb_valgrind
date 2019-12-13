@@ -179,39 +179,82 @@ hashTable *createHashTable(int size)
 void addHashTable(char *key, int keyIndex, hashTable *hash)
 {
 	printf("\taddHashTable (%s,%d,%p)\n", key, keyIndex, hash);
-	if (hash->maxElements == hash->addedElements)
+	if (hash->maxElements == hash->addedElements) //If this elemnt will exceed max, double size
 	{
 		printf("\tDoubling the size of the hashTable...\n");
-		//doubleHashTable(hash);
-
+		doubleHashTable(hash);
 	}
-	else
+	int index = hash_function(key, hash->size); //Compute index of the key
+	printf("\t\thashIndex %d\n",index);
+	printf("\t\tThis index points to %p \n",hash->table[index]);
+	if (hash->table[index] == NULL)				//Create linked list
 	{
-		int index = hash_function(key, hash->size); //Compute index of the key
-		printf("\t\thashIndex %d\n",index);
-		printf("\t\tThis index points to %p \n",hash->table[index]);
-		if (hash->table[index] == NULL)				//Create linked list
-		{
-			printf("\t\tThere is no linkedList at this index yet! Creating a new one...\n");
-			hash->table[index]=createLinkedList(key, keyIndex);
-			linkedList *temp = hash->table[index];
-			printf("\tLinkedlist %p\n",temp);
-			printf("\tCreated linkedList at index %d (root %p), that has a prev of %p with %s...\n", index, hash->table[index],temp->prev , key);
+		printf("\t\tThere is no linkedList at this index yet! Creating a new one...\n");
+		hash->table[index]=createLinkedList(key, keyIndex);
+		linkedList *temp = hash->table[index];
+		printf("\tLinkedlist %p\n",temp);
+		printf("\tCreated linkedList at index %d (root %p), that has a prev of %p with %s...\n", index, hash->table[index],temp->prev , key);
+		hash->addedElements++;
+	}
+	else //Add element to linked list
+	{
+		printf("\tAdded (%s) element to linkedList at index %d...\n", key, index);
+		int updatedElement = addLinkedList(key, keyIndex, hash->table[index]);
+		if(!updatedElement)
 			hash->addedElements++;
-		}
-		else //Add element to linked list
-		{
-			printf("\tAdded (%s) element to linkedList at index %d...\n", key, index);
-			int updatedElement = addLinkedList(key, keyIndex, hash->table[index]);
-			if(!updatedElement)
-				hash->addedElements++;
-		}
 	}
 }
 
-//hashTable* doubleHashTable(hashTable *hash){
+void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash){ //Add dataItem to hashTable without need to check if it already exists (auxiliates doubleHashTable())
+
+	printf("\taddLinkListNodeToHashTable(%p,%p)\n",ll,hash);
+	printf("\t\tNode is next %p prev %p and ",ll->next,ll->prev);
+	showDataItem(ll->data);
+	int index = hash_function(ll->data->key, hash->size);
+	printf("\t\tIt will be stored at index %d that has the value %p\n",index,hash->table[index]);
+
+	if (hash->table[index] == NULL)	//There is no linkedList at this index yet
+	{
+
+		printf("\t\tThere is no linkedList at this index yet! Adding this one...\n");
+		ll->next=NULL;
+		ll->prev = ll; //when there are only one elemnent of the list, it is the first and the last (so the l->prev)
+		hash->table[index]=ll;
+	}
+	else //Add node to the already existant linkedList
+	{
+		printf("\t\tThere is a linkedList at this index already! Adding node...\n");
+		linkedList *root=hash->table[index];
+		ll->prev = root->prev;
+		ll->next=NULL;
+		root->prev->next = ll;
+		root->prev = ll;
+	}
+	hash->addedElements++;
+
+}
+
+void doubleHashTable(hashTable *hash){
+
+	printf("\tdoubleHashTable(%p)\n",hash);
+
+	hashTable *newHash=createHashTable(2*hash->size);
+
+	for (int i = 0; i < hash->size; i++)
+	{
+		if (hash->table[i] != NULL) //There is a linkedList at this index
+		{
+			linkedList *tempLinkedList=hash->table[i];
+			while(tempLinkedList!=NULL){ //Add all the nodes to the new hashTable
+				addLinkListNodeToHashTable(tempLinkedList,newHash);
+				tempLinkedList=tempLinkedList->next;
+			}
+		}
+	}
+
+	hash=newHash;
 	
-//}
+}
 
 dataItem *getHashTable(char *key, hashTable *hash)
 {
@@ -309,7 +352,21 @@ int main()
 	addHashTable("Sétima chave", 47, ht);
 	addHashTable("Oitava chave", 58, ht);
 
+	showHashTable(ht);
 
+	printf("Checking if all the elements are the old elements are there and with the same values...\n");
+	showDataItem(getHashTable("Primeira chave", ht));
+	assert(getHashTable("Primeira chave", ht)!=NULL);
+	//assert(getHashTable("Primeira chave", ht)->counter==2);
+	//assert(getHashTable("Primeira chave", ht)->firstIndex==4);
+	//assert(getHashTable("Primeira chave", ht)->lastIndex==98);
+	showDataItem(getHashTable("Segunda chave", ht));
+	assert(getHashTable("Segunda chave", ht)!=NULL);
+	//assert(getHashTable("Segunda chave", ht)->counter==1);
+	//assert(getHashTable("Segunda chave", ht)->firstIndex==10);
+	//assert(getHashTable("Segunda chave", ht)->lastIndex==10);
+	showDataItem(getHashTable("Teceira chave", ht));
+	assert(getHashTable("Teceira chave", ht)==NULL);
 
 
 	printf("\nThe program has finished!\n");
