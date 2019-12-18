@@ -55,7 +55,7 @@ typedef struct linkedList
 
 //Functions that will be implemented for this structure
 linkedList *createLinkedList(char *key, int index);
-int addLinkedList(char *key, int index, linkedList *root);
+int addLinkedList(char *key, int index, linkedList **root);
 void showLinkedList(linkedList *link);
 dataItem *getLinkedList(char *key, linkedList *link);
 
@@ -81,10 +81,10 @@ linkedList *createLinkedList(char *key, int index)
 	return l;
 }
 
-int addLinkedList(char *key, int index, linkedList *root)
+int addLinkedList(char *key, int index, linkedList **root)
 {
-	printf("\taddlinkedList (%s,%d,%p)\n", key, index, root);
-	linkedList *analising = root;
+	printf("\taddlinkedList (%s,%d,%p)\n", key, index, *root);
+	linkedList *analising = *root;
 
 	//check for dataItem with the same key at the linked list
 	bool similar = false; //true if exists dataItem with the same key, at the end of the while cycle
@@ -108,6 +108,7 @@ int addLinkedList(char *key, int index, linkedList *root)
 	//if the key already exists, update properties, otherwise, create a new node to the linkedList
 	if (similar)
 	{
+		printf("\t\tkey already exists at position %p, updating it...\n",analising);
 		analising->data->counter++;						   //increment counter
 		int distance = index - analising->data->lastIndex; //compute distance from last index
 		//update min and max distances
@@ -119,15 +120,36 @@ int addLinkedList(char *key, int index, linkedList *root)
 			analising->data->lastIndex = index; //change last index
 		if(analising->data->firstIndex>index)
 			analising->data->firstIndex = index; //change first index
+		//make node closer to the beggining of the linkedList (one node closer)
+		if(analising->prev!=analising){ //If analising isn't the only the node of the linkedList
+			printf("\t\tthis node isn't the only one at this linkedList and is not the first one! Making it closer to the beggining...\n");
+			linkedList *tempPrev=analising->prev->prev;
+			if(analising->next!=NULL)
+				analising->next->prev=analising->prev;
+			if(analising->prev->prev->next!=NULL)
+				analising->prev->prev->next=analising;
+			analising->prev->next=analising->next;
+			analising->prev->prev=analising;
+			analising->next=analising->prev;
+			analising->prev=tempPrev;
+			printf("\t\treposicioned node, the current hashTable is...\n");
+			if(analising->next==*root){ //If the previous node (now next) is the root
+				printf("\t\t!!!analising is now root\n");
+				//linkedList **rootPointer = root;
+				//*rootPointer=analising;
+				*root=analising;
+				//root=analising;
+			}
+		}
 		printf("\t\tUpdated at linkedlist \t");
 		showDataItem(analising->data);
 	}
 	else
 	{
 		linkedList *l = createLinkedList(key, index);
-		l->prev = root->prev; //root->prev points to the last element of the linked list (lets say last)
-		root->prev->next = l; //the last->next element will be the element that is being added
-		root->prev = l;		  //the element being added is the last element now, so the root->prev
+		l->prev = (*root)->prev; //root->prev points to the last element of the linked list (lets say last)
+		(*root)->prev->next = l; //the last->next element will be the element that is being added
+		(*root)->prev = l;		  //the element being added is the last element now, so the root->prev
 							  //l->next=NULL;
 		printf("\t\tAdded to linkedlist \t");
 		showDataItem(l->data);
@@ -139,6 +161,7 @@ int addLinkedList(char *key, int index, linkedList *root)
 
 void showLinkedList(linkedList *link)
 { //link=root
+	printf("------------------------------------------\n");
 	while (link != NULL)
 	{
 		printf("Showing %p\n", link);
@@ -148,6 +171,7 @@ void showLinkedList(linkedList *link)
 		showDataItem(link->data);
 		link = link->next;
 	}
+	printf("------------------------------------------\n");
 }
 
 dataItem *getLinkedList(char *key, linkedList *link)
@@ -265,7 +289,7 @@ void addHashTable(char *key, int keyIndex, hashTable *hash)
 	else //Add element to linked list
 	{
 		printf("\tAdded (%s) element to linkedList at index %d...\n", key, index);
-		int updatedElement = addLinkedList(key, keyIndex, hash->table[index]);
+		int updatedElement = addLinkedList(key, keyIndex, &hash->table[index]);
 		if(!updatedElement)
 			hash->addedElements++;
 	}
@@ -347,11 +371,14 @@ int main()
 
 	linkedList *l1 = createLinkedList("Primeira chave", 0);
 
-	addLinkedList("Segunda chave", 1, l1);
-	addLinkedList("Terceira chave", 2, l1);
-	addLinkedList("Quarta chave", 3, l1);
-	addLinkedList("Quinta chave", 4, l1);
-	addLinkedList("Segunda chave", 5, l1);
+	addLinkedList("Segunda chave", 1, &l1);
+	addLinkedList("Terceira chave", 2, &l1);
+	addLinkedList("Quarta chave", 3, &l1);
+	addLinkedList("Quinta chave", 4, &l1);
+
+	addLinkedList("Segunda chave", 5, &l1);
+
+	showLinkedList(l1);
 
 	linkedList *l = l1;
 	while (l != NULL)
@@ -420,6 +447,17 @@ int main()
 	//showDataItem(getHashTable("Teceira chave", ht));
 	assert(getHashTable("Teceira chave", ht)==NULL);
 
+	printf("All tests passed!\n");
+
+	//Test to same key insertion
+	printf("\nTesting the insertion of the same key and the repositioning of it in the hashTable...\n");
+	printf("Going to insert Sétima Chave again, that is the second node of the linked link and should become the first!\n");
+	addHashTable("Sétima chave", 65, ht);
+	printf("Showing hashTable now...\n");
+	showHashTable(ht);
+	assert(strcasecmp(ht->table[13]->data->key,"Sétima chave")==0);
+
+	printf("All tests passed!\n");
 
 	printf("\nThe program has finished!\n");
 }
