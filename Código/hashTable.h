@@ -32,7 +32,6 @@ typedef struct dataItem
 	int counter;
 	int firstIndex;
 	int lastIndex;
-	int sumIndex;
 	int maxDistance;
 	int minDistance;
 } dataItem;
@@ -40,7 +39,7 @@ typedef struct dataItem
 void showDataItem(dataItem *dt)
 {
 	if (dt != NULL)
-		printf("dataItem witk key %s, counter %d, firstIndex %d, lastIndex %d, sumIndex %d, maxDistance %d and minDistance %d.\n", dt->key, dt->counter, dt->firstIndex, dt->lastIndex, dt->sumIndex, dt->maxDistance, dt->minDistance);
+		printf("dataItem witk key %s, counter %d, firstIndex %d, lastIndex %d, maxDistance %d and minDistance %d.\n", dt->key, dt->counter, dt->firstIndex, dt->lastIndex, dt->maxDistance, dt->minDistance);
 	else
 		printf("NULL\n");
 }
@@ -69,7 +68,6 @@ linkedList *createLinkedList(char *key, int index)
 	d->key = key;
 	d->maxDistance = 0;
 	d->minDistance = 10000000;
-	d->sumIndex = index;
 	//create linkedList with dataItem
 	linkedList *l = malloc(sizeof(linkedList));
 	l->prev = l; //when there are only one elemnent of the list, it is the first and the last (so the l->prev)
@@ -296,7 +294,7 @@ void showHashTable(hashTable *ht)
 	}
 }
 
-int main()
+/* int main()
 {
 
 	//Test to LINKED LIST
@@ -367,4 +365,4 @@ int main()
 	printf("All tests passed!\n");
 
 	printf("\nThe program has finished!\n");
-}
+} */

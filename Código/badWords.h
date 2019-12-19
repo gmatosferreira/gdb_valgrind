@@ -6,7 +6,7 @@
 char * badWord(int, char*);
 char * badWord2(int, char*, int, int);
 char palavra[10000000];
-int main(int argc, char **argv){
+/*int main(int argc, char **argv){
     char s[100]="O joao` foi as compra's, comprou um umb'igo! falante por £233";
     int n = sizeof(s);
     
@@ -36,7 +36,7 @@ int main(int argc, char **argv){
     t = clock() - t;
     time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
     printf("The program took %f seconds to execute\n", time_taken);
-}
+}*/
 
 char * badWord(int n, char s[n]){
     int index=0;

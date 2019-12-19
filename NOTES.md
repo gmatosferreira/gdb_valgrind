@@ -67,3 +67,5 @@ Programa que conta palavras está errado!
 
 ##Referências
 https://www.youtube.com/watch?v=T9gct6Dx-jo
+
+Resolução de memory leak: https://www.geeksforgeeks.org/g-fact-30/ ; https://www.geeksforgeeks.org/strdup-strdndup-functions-c/ ; https://stackoverflow.com/questions/5134891/how-do-i-use-valgrind-to-find-memory-leaks
