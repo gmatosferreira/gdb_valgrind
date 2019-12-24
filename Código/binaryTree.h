@@ -77,7 +77,7 @@ int printTree(node* root){
     return 0;
 }
   
-int main(){ 
+/*int main(){ 
     node *root = newNode(1, NULL);   
 
     root->left        = newNode(2, root); 
@@ -100,4 +100,4 @@ int main(){
     
     printf("search->right->data encontrada do searchNode(root, 5) %d\n", searchedNode->data);
     return 0; 
-}
+}*/

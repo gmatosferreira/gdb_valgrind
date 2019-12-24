@@ -11,8 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "hashTable.h" //para poder usar as hash
+#include "hashTable.h"
 #include "badWords.h"
+//#include "binaryTree.h"
 
 //
 // Custom ordered binary tree implementation
@@ -98,18 +99,21 @@ int main(int argc,char **argv)
   if(argc >= 3 && strcmp(argv[1],"-d") == 0) opt = 'd'; // different words
   if(argc >= 3 && strcmp(argv[1],"-l") == 0) opt = 'l'; // list words
   if(argc >= 3 && strcmp(argv[1],"-h") == 0) opt = 'h'; // hashTable
+  if(argc >= 3 && strcmp(argv[1],"-b") == 0) opt = 'b'; // binaryTree
   if(opt < 0)
   {
     fprintf(stderr,"\e[5;31m"); // blink on (may not work in some text terminals), text in red
     fprintf(stderr,"usage: %s -a text_file ...  # count the number of words\n",argv[0]);
     fprintf(stderr,"       %s -d text_file ...  # count the number of different words\n",argv[0]);
     fprintf(stderr,"       %s -l text_file ...  # list all words\n",argv[0]);
+	fprintf(stderr,"usage: %s -h text_file ...  # shows word information from a hashTable",argv[0]);
+	fprintf(stderr,"usage: %s -b text_file ...  # shows words information from a sorted Binary Tree\n",argv[0]);
     fprintf(stderr,"\e[0m"); // normal output
     return 1;
   }
   for(int i = 2;i < argc;i++) //ALTERADO: i tem q ser menor q nº de argumentos
   {
-    hashTable *h1 = createHashTable(70000); //só pra 100000 consegue correr até ao fim
+    hashTable *h1 = createHashTable(100000); //só pra 100000 consegue correr até ao fim
     // read text file
     FILE *fp = fopen(argv[i],"r");
     if(fp == NULL)
@@ -123,8 +127,8 @@ int main(int argc,char **argv)
     while(fscanf(fp,"%63s",word) == 1){
       root = add_word(root,word);       
       ind++;
-      printf("%d %s\n",ind,word); // teste
-      strcpy(word,badWord(sizeof(word),word));
+      //printf("%d %s\n",ind,word); // teste
+      //strcpy(word,badWord2(sizeof(word),word,0,0));
       addHashTable(word,ind,h1);      
     }
     fclose(fp);
@@ -134,7 +138,8 @@ int main(int argc,char **argv)
       case 'a': printf("The file %s contains %ld words\n",argv[i],count_all_words(root)); break;
       case 'd': printf("The file %s contains %ld distinct words\n",argv[i],count_different_words(root)); break;
       case 'l': printf("Contents of the file %s:\n",argv[i]); list_words(root); break;
-      case 'h': printf("\nNothing by now...\n"); break;
+      case 'h': printf("\nHASH TABLE with linked list...\n"); showHashTable(h1); break;
+      case 'b': printf("\nHASH TABLE with binary tree...\n"); break;
     }
     // free memory
     free_tree(root);

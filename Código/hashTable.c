@@ -286,14 +286,18 @@ void showHashTable(hashTable *ht)
 			printf("LinkedList with: ");
 			linkedList *tempLL=ht->table[i];
 			while(tempLL!=NULL) {
-				printf("%s %d %d %d %d %d\n",tempLL->data->key,tempLL->data->firstIndex,tempLL->data->lastIndex,tempLL->data->counter,tempLL->data->maxDistance,tempLL->data->minDistance);
+				//printf("%s, ",tempLL->data->key);
+				printf("%d ! ",tempLL->data->firstIndex);
+				//printf("%d * ",tempLL->data->lastIndex);
+				//printf("%d - ",tempLL->data->counter);
 				tempLL=tempLL->next;
 			}
+			printf("\n");
 		}
 	}
 }
 
-/* int main()
+ int main()
 {
 
 	//Test to LINKED LIST
@@ -364,4 +368,4 @@ void showHashTable(hashTable *ht)
 	printf("All tests passed!\n");
 
 	printf("\nThe program has finished!\n");
-} */
+} 
