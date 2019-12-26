@@ -7,7 +7,7 @@ clean:
 	rm -f count_words
 
 .PHONY:		all
-all:		binary_search count_words primes
+all:		hashTable count_words
 
 count_words:	count_words.c
 	cc -Wall -g count_words.c -o count_words
