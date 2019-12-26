@@ -279,17 +279,20 @@ dataItem *getHashTable(char *key, hashTable *hash)
 
 void showHashTable(hashTable *ht)
 {
+	printf("Showing hashTable stored at memory position %p, with size %d, %d added elements out of %d (max)...\n", ht, ht->size, ht->addedElements, ht->maxElements);
 	for (int i = 0; i < ht->size; i++)
 	{
-		if (ht->table[i] != NULL)
+		printf("%d (%p): ", i, ht->table[i]);
+		if (ht->table[i] == NULL)
+		{
+			printf("Not used yet\n");
+		}
+		else
 		{
 			printf("LinkedList with: ");
 			linkedList *tempLL=ht->table[i];
 			while(tempLL!=NULL) {
-				//printf("%s, ",tempLL->data->key);
-				printf("%d ! ",tempLL->data->firstIndex);
-				//printf("%d * ",tempLL->data->lastIndex);
-				//printf("%d - ",tempLL->data->counter);
+				printf("%s, ",tempLL->data->key);
 				tempLL=tempLL->next;
 			}
 			printf("\n");
@@ -364,6 +367,8 @@ void showHashTable(hashTable *ht)
 	printf("\nTesting the insertion of the same key and the repositioning of it in the hashTable...\n");
 	addHashTable("Sétima chave", 65, ht);
 	assert(strcasecmp(ht->table[13]->data->key,"Sétima chave")==0);
+    
+    showHashTable(ht);
 
 	printf("All tests passed!\n");
 

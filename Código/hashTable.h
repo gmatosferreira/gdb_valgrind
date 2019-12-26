@@ -279,16 +279,23 @@ dataItem *getHashTable(char *key, hashTable *hash)
 
 void showHashTable(hashTable *ht)
 {
+	printf("Showing hashTable stored at memory position %p, with size %d, %d added elements out of %d (max)...\n", ht, ht->size, ht->addedElements, ht->maxElements);
 	for (int i = 0; i < ht->size; i++)
 	{
-		if (ht->table[i] != NULL)
+		printf("%d (%p): ", i, ht->table[i]);
+		if (ht->table[i] == NULL)
+		{
+			printf("Not used yet\n");
+		}
+		else
 		{
 			printf("LinkedList with: ");
 			linkedList *tempLL=ht->table[i];
 			while(tempLL!=NULL) {
-				printf("%s %d %d %d %d %d\n",tempLL->data->key,tempLL->data->firstIndex,tempLL->data->lastIndex,tempLL->data->counter,tempLL->data->maxDistance,tempLL->data->minDistance);
+				printf("%s, ",tempLL->data->key);
 				tempLL=tempLL->next;
 			}
+			printf("\n");
 		}
 	}
 }

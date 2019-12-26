@@ -122,20 +122,14 @@ int main(int argc,char **argv)
       return 2;
     }
     char word[64]; // words can have at most 63 bytes
-    char wordBad[64];
     node *root = NULL;
     int ind = 0; //indice de posicao das palavras no texto
     while(fscanf(fp,"%63s",word) == 1){
-      //root = add_word(root,word);       
+      root = add_word(root,word);       
       ind++;
-      printf(" %d %s (\t",ind,word); // teste
-      strcpy(wordBad,badWord(sizeof(word),word));
-      printf("%s)",wordBad);
-      addHashTable(word,ind,h1);
-      if(getHashTable(word,h1)!=NULL)
-          printf(" TEST PASSSED\n");
-      else
-          printf(" TEST NOOOOOOOOOOOOOOOOOOOOOOOT PASSED!\n");
+      //printf("%d %s\n",ind,word); // teste
+      //strcpy(word,badWord2(sizeof(word),word,0,0));
+      addHashTable(word,ind,h1);      
     }
     fclose(fp);
     // report
