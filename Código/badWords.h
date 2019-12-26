@@ -3,8 +3,9 @@
 #include <ctype.h>
 #include <time.h>
 
-char * badWord(int, char*);
+/*char * badWord(int, char*);
 char * badWord2(int, char*, int, int);
+void badWord3(char*);*/
 char palavra[10000000];
 /*int main(int argc, char **argv){
     char s[100]="O joao` foi as compra's, comprou um umb'igo! falante por £233";
@@ -35,10 +36,21 @@ char palavra[10000000];
     
     t = clock() - t;
     time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
+    printf("The program took %f seconds to execute\n\n", time_taken);
+
+    // badWord3
+    t = clock();
+    printf("Timer starts for badWord3 \n");
+    
+    badWord3(s);
+    printf("%s\n", s);
+    
+    t = clock() - t;
+    time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
     printf("The program took %f seconds to execute\n", time_taken);
 }*/
 
-char * badWord(int n, char s[n]){
+/*char * badWord(int n, char s[n]){
     int index=0;
     for(int i=0; i<n; i++){
         char c = s[i];
@@ -58,7 +70,7 @@ char * badWord2(int n, char s[n], int currentIndex, int currentCounter){
     }
     char c = s[currentIndex];
     char c2 = s[currentIndex+1];
-    if(isalnum(c) || (ispunct(c) && isalpha(c2))){
+    if(isalnum(c)!=0 || (ispunct(c) && isalpha(c2))!=0){
         palavra[currentCounter]=c;
         currentCounter++;
     }
@@ -66,4 +78,14 @@ char * badWord2(int n, char s[n], int currentIndex, int currentCounter){
     currentIndex++;
     badWord2(n, s, currentIndex, currentCounter);
     
+}*/
+
+void badWord(char *s){
+    int i, j;
+    for(i=j=0; s[i]!='\0'; i++){
+        if(isalnum(s[i])!=0 || (ispunct(s[i]) && isalpha(s[i+1]))!=0){
+            s[j++]=s[i];
+        }
+    }
+    s[j]='\0';
 }
