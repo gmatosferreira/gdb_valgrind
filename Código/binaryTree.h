@@ -2,27 +2,26 @@
 #include <string.h>
 #include <stdlib.h>
 
-// de alguma forma à qual ainda não cheguei, temos de conseguir ordenar a árvore por hashcodes
 typedef struct node { 
-    //a ideia era aqui adicionar mais um campo para o número de aparições ou pôr a variável 'data' como sendo um vetor de duas posições (aparições, palavra)
-    int data; 
+    // data[int, int]=[hash da palavra, ocorrencias da palavra]
+    int palavra;
+    int contador; 
     struct node* left; 
     struct node* right; 
     struct node* parent; 
 } node; 
 
-// a ideia é usar um vetor data[] (com tamanho 2: palavra e aparições) e, assim, procuramos por uma palavra e ele dá-nos o número de aparições da palavra.  
 node* searchedNode=NULL;
-void searchNode(node* roott, int data){
+void searchNode(node* roott, int palavra){
     if(roott != NULL){
-        if(roott->data == data){
+        if(roott->palavra == palavra){
             searchedNode=roott;
         }else{
-            //o codigo abaixo, aumenta a velocidade de pesquisa, ignorando logo os valores maiores/menores dependendo do que se está a procura
-            if(data <= roott->data){
-                searchNode(roott->left, data);
+            searchedNode=NULL;
+            if(palavra <= roott->palavra){
+                searchNode(roott->left, palavra);
             }else{
-                searchNode(roott->right, data);
+                searchNode(roott->right, palavra);
             }
         }
     }
@@ -34,70 +33,62 @@ int minValue(node* n){
     while (current->left != NULL) { 
         current = current->left; 
     } 
-    return(current->data); 
+    return(current->palavra); 
 }
 
-node* newNode(int data, node* parent){  
+node* newNode(int palavra, node* parent){
     node* n = (node*)malloc(sizeof(node)); 
-
-    n->data = data; 
+    //n->data = data; 
+    n->palavra = palavra;
+    n->contador = 1;  
     n->left = NULL; 
     n->right = NULL;
     n->parent = parent;
     return(n); 
 } 
 
-node* insert(node* node, int data){
-    if (node == NULL)  
-        return(newNode(data, NULL));   
-    else { 
-        searchNode(node, data);
+void printTree(node* root){
+    if(root != NULL){
+        printTree(root->left);
+        printf("%d - %d\n", root->palavra, root->contador);
+        printTree(root->right);
+    }
+}
+
+node* insert(node* node, int palavra){
+    if (node != NULL) { 
+        searchNode(node, palavra);
         if(searchedNode!=NULL){
-            searchedNode->data=searchedNode->data+1;
+            searchedNode->contador=searchedNode->contador+1;
             return searchedNode;
         }else{
-            if (data <= node->data){  
-                node->left  = insert(node->left, data); 
+            if (palavra <= node->palavra){  
+                node->left  = insert(node->left, palavra); 
                 node->left->parent=node;
             }else{
-                node->right = insert(node->right, data); 
+                node->right = insert(node->right, palavra); 
                 node->right->parent=node;
             }
             return node; 
         } 
-    } 
+    }else{
+        return(newNode(palavra, NULL)); 
+    }
 } 
 
-int printTree(node* root){
-    if(root != NULL){
-        printTree(root->left);
-        printf("%d \n", root->data);
-        printTree(root->right);
-    }
-    return 0;
-}
   
 /*int main(){ 
-    node *root = newNode(1, NULL);   
-
-    root->left        = newNode(2, root); 
-    root->right       = newNode(3, root); 
-    root->left->left  = newNode(4, root->left); 
-
+    int data[2];
+    node *root = newNode(2345235, NULL);   
+    root->left = newNode(2344533, root); 
+    root->right = newNode(3545347, root); 
+    root->right->right = newNode(756745, root->left); 
+    
     //a inserção é feita com (raiz, valor)
     // no caso de o valor já existir, então incrementa 1
-    insert(root, 5); 
-    insert(root, 6); 
-    insert(root, 7);                                                    
-    insert(root, 8);                                                       
-    insert(root, 9); 
-    insert(root, 9);                                                    
+    insert(root, 756745);
+    insert(root, 435643);                                              
 
     printTree(root);
-
-    printf("data do root %d\n",root->data);
-    searchNode(root, 5);
-    
-    printf("search->right->data encontrada do searchNode(root, 5) %d\n", searchedNode->data);
     return 0; 
 }*/
