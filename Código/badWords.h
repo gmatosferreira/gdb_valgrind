@@ -1,8 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <time.h>
-
 /*char * badWord(int, char*);
 char * badWord2(int, char*, int, int);
 void badWord3(char*);*/

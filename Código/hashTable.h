@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <math.h>
+
 
 unsigned int hash_function(const char *str, unsigned int s)
 { //returns the hashcode of *str between 0 and s
@@ -32,6 +27,7 @@ typedef struct dataItem
 	int counter;
 	int firstIndex;
 	int lastIndex;
+	int sumIndex;
 	int maxDistance;
 	int minDistance;
 } dataItem;
@@ -39,7 +35,7 @@ typedef struct dataItem
 void showDataItem(dataItem *dt)
 {
 	if (dt != NULL)
-		printf("dataItem witk key %s, counter %d, firstIndex %d, lastIndex %d, maxDistance %d and minDistance %d.\n", dt->key, dt->counter, dt->firstIndex, dt->lastIndex, dt->maxDistance, dt->minDistance);
+		printf("dataItem witk key %s, counter %d, firstIndex %d, lastIndex %d, sumIndex %d, maxDistance %d and minDistance %d.\n", dt->key, dt->counter, dt->firstIndex, dt->lastIndex, dt->sumIndex, dt->maxDistance, dt->minDistance);
 	else
 		printf("NULL\n");
 }
@@ -68,6 +64,7 @@ linkedList *createLinkedList(char *key, int index)
 	d->key = key;
 	d->maxDistance = 0;
 	d->minDistance = 10000000;
+	d->sumIndex = index;
 	//create linkedList with dataItem
 	linkedList *l = malloc(sizeof(linkedList));
 	l->prev = l; //when there are only one elemnent of the list, it is the first and the last (so the l->prev)
@@ -279,15 +276,10 @@ dataItem *getHashTable(char *key, hashTable *hash)
 
 void showHashTable(hashTable *ht)
 {
-	printf("Showing hashTable stored at memory position %p, with size %d, %d added elements out of %d (max)...\n", ht, ht->size, ht->addedElements, ht->maxElements);
 	for (int i = 0; i < ht->size; i++)
 	{
-		printf("%d (%p): ", i, ht->table[i]);
-		if (ht->table[i] == NULL)
-		{
-			printf("Not used yet\n");
-		}
-		else
+        printf("%d (%14p)\t",i,ht->table[i]);
+		if (ht->table[i] != NULL)
 		{
 			printf("LinkedList with: ");
 			linkedList *tempLL=ht->table[i];
@@ -295,80 +287,7 @@ void showHashTable(hashTable *ht)
 				printf("%s, ",tempLL->data->key);
 				tempLL=tempLL->next;
 			}
-			printf("\n");
 		}
+        printf("\n");
 	}
 }
-
-/* int main()
-{
-
-	//Test to LINKED LIST
-	printf("Testing LINKED LIST implementation...\n");
-
-	linkedList *l1 = createLinkedList("Primeira chave", 0);
-
-	addLinkedList("Segunda chave", 1, &l1);
-	addLinkedList("Terceira chave", 2, &l1);
-	addLinkedList("Quarta chave", 3, &l1);
-	addLinkedList("Quinta chave", 4, &l1);
-
-	addLinkedList("Segunda chave", 5, &l1);
-
-	linkedList *l = l1;
-	while (l != NULL)
-	{
-		if (l->next != NULL)
-			assert(l->next->prev == l);
-		if (l->prev->next != NULL)
-			assert(l->prev->next == l);
-		l = l->next;
-	}
-
-	printf("All tests passed!\n");
-
-	//Test to HASH TABLE
-	printf("\nTesting HASH TABLE implementation...\n");
-
-	hashTable *ht = createHashTable(10);
-
-	addHashTable("Primeira chave", 4, ht);
-	addHashTable("Segunda chave", 10, ht);
-	addHashTable("Primeira chave", 98, ht);
-
-	assert(getHashTable("Primeira chave", ht)!=NULL);
-	assert(getHashTable("Segunda chave", ht)!=NULL);
-	assert(getHashTable("Teceira chave", ht)==NULL);
-
-	printf("All tests passed!\n");
-
-	//Test to HASHTABLE RESIZE
-	printf("\nTesting hashTable RESIZE implementation...\n");
-
-	addHashTable("Quarta chave", 14, ht);
-	addHashTable("Quinta chave", 25, ht);
-	addHashTable("Sexta chave", 36, ht);
-	addHashTable("Sétima chave", 47, ht);
-	addHashTable("Oitava chave", 58, ht);
-
-	assert(getHashTable("Primeira chave", ht)!=NULL);
-	assert(getHashTable("Primeira chave", ht)->counter==2);
-	assert(getHashTable("Primeira chave", ht)->firstIndex==4);
-	assert(getHashTable("Primeira chave", ht)->lastIndex==98);
-	assert(getHashTable("Segunda chave", ht)!=NULL);
-	assert(getHashTable("Segunda chave", ht)->counter==1);
-	assert(getHashTable("Segunda chave", ht)->firstIndex==10);
-	assert(getHashTable("Segunda chave", ht)->lastIndex==10);
-	assert(getHashTable("Teceira chave", ht)==NULL);
-
-	printf("All tests passed!\n");
-
-	//Test to same key insertion
-	printf("\nTesting the insertion of the same key and the repositioning of it in the hashTable...\n");
-	addHashTable("Sétima chave", 65, ht);
-	assert(strcasecmp(ht->table[13]->data->key,"Sétima chave")==0);
-
-	printf("All tests passed!\n");
-
-	printf("\nThe program has finished!\n");
-} */
