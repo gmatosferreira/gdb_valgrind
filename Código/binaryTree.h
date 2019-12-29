@@ -2,33 +2,33 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct node { 
+typedef struct nodeBT { 
     // data[int, int]=[hash da palavra, ocorrencias da palavra]
     int palavra;
     int contador; 
-    struct node* left; 
-    struct node* right; 
-    struct node* parent; 
-} node; 
+    struct nodeBT* left; 
+    struct nodeBT* right; 
+    struct nodeBT* parent; 
+} nodeBT; 
 
-node* searchedNode=NULL;
-void searchNode(node* roott, int palavra){
+nodeBT* searchednodeBT=NULL;
+void searchnodeBT(nodeBT* roott, int palavra){
     if(roott != NULL){
         if(roott->palavra == palavra){
-            searchedNode=roott;
+            searchednodeBT=roott;
         }else{
-            searchedNode=NULL;
+            searchednodeBT=NULL;
             if(palavra <= roott->palavra){
-                searchNode(roott->left, palavra);
+                searchnodeBT(roott->left, palavra);
             }else{
-                searchNode(roott->right, palavra);
+                searchnodeBT(roott->right, palavra);
             }
         }
     }
 }
 
-int minValue(node* n){ 
-    node* current = n; 
+int minValue(nodeBT* n){ 
+    nodeBT* current = n; 
 
     while (current->left != NULL) { 
         current = current->left; 
@@ -36,8 +36,8 @@ int minValue(node* n){
     return(current->palavra); 
 }
 
-node* newNode(int palavra, node* parent){
-    node* n = (node*)malloc(sizeof(node)); 
+nodeBT* newnodeBT(int palavra, nodeBT* parent){
+    nodeBT* n = (nodeBT*)malloc(sizeof(nodeBT)); 
     //n->data = data; 
     n->palavra = palavra;
     n->contador = 1;  
@@ -47,7 +47,7 @@ node* newNode(int palavra, node* parent){
     return(n); 
 } 
 
-void printTree(node* root){
+void printTree(nodeBT* root){
     if(root != NULL){
         printTree(root->left);
         printf("%d - %d\n", root->palavra, root->contador);
@@ -55,34 +55,34 @@ void printTree(node* root){
     }
 }
 
-node* insert(node* node, int palavra){
-    if (node != NULL) { 
-        searchNode(node, palavra);
-        if(searchedNode!=NULL){
-            searchedNode->contador=searchedNode->contador+1;
-            return searchedNode;
+nodeBT* insert(nodeBT* nodeBT, int palavra){
+    if (nodeBT != NULL) { 
+        searchnodeBT(nodeBT, palavra);
+        if(searchednodeBT!=NULL){
+            searchednodeBT->contador=searchednodeBT->contador+1;
+            return searchednodeBT;
         }else{
-            if (palavra <= node->palavra){  
-                node->left  = insert(node->left, palavra); 
-                node->left->parent=node;
+            if (palavra <= nodeBT->palavra){  
+                nodeBT->left  = insert(nodeBT->left, palavra); 
+                nodeBT->left->parent=nodeBT;
             }else{
-                node->right = insert(node->right, palavra); 
-                node->right->parent=node;
+                nodeBT->right = insert(nodeBT->right, palavra); 
+                nodeBT->right->parent=nodeBT;
             }
-            return node; 
+            return nodeBT; 
         } 
     }else{
-        return(newNode(palavra, NULL)); 
+        return(newnodeBT(palavra, NULL)); 
     }
 } 
 
   
 /*int main(){ 
     int data[2];
-    node *root = newNode(2345235, NULL);   
-    root->left = newNode(2344533, root); 
-    root->right = newNode(3545347, root); 
-    root->right->right = newNode(756745, root->left); 
+    nodeBT *root = newnodeBT(2345235, NULL);   
+    root->left = newnodeBT(2344533, root); 
+    root->right = newnodeBT(3545347, root); 
+    root->right->right = newnodeBT(756745, root->left); 
     
     //a inserção é feita com (raiz, valor)
     // no caso de o valor já existir, então incrementa 1
