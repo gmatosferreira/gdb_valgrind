@@ -117,13 +117,11 @@ int main(int argc,char **argv)
     fprintf(stderr,"\e[0m"); // normal output
     return 1;
   }
-  hashTable *h1 = createHashTable(10); //só pra 100000 consegue correr até ao fim
+  hashTable *h1 = createHashTable(10);
   //raiz da Binary Tree
   nodeBT *rootBT=NULL;
   //número de nós
   int contadorNodes=0;
-  printf("Created hashTable\n");
-  showHashTable(h1);
   for(int i = 2;i < argc;i++) //ALTERADO: i tem q ser menor q nº de argumentos
   {
     // read text file
@@ -136,33 +134,26 @@ int main(int argc,char **argv)
     char word[64]; // words can have at most 63 bytes
     node *root = NULL;
     int ind = 0; //indice de posicao das palavras no texto
-    int contadorTemp=0;
     while(fscanf(fp,"%63s",word) == 1){
         badWord(word);
         root = add_word(root,word);       
         ind++;
-        //printf("%d %s\n",ind,word); // teste
-        //strcpy(word,badWord2(sizeof(word),word,0,0));
-        if(contadorTemp++<4){
-            printf("Adding %s\n",word);
-            addHashTable(word,ind,h1);
 
-            // our binary tree stuff
-            unsigned int hashCode=hash_function(word,sizeof(word));
+        addHashTable(word,ind,h1);
 
-            if(contadorNodes==0)
-              rootBT=newnodeBT(hashCode, NULL);
-            else
-              insert(rootBT, hashCode);
+        // our binary tree stuff
+        unsigned int hashCode=hash_function(word,sizeof(word));
 
-            contadorNodes++;
-            // end of our binary tree stuff stuff
+        if(contadorNodes==0)
+          rootBT=newnodeBT(hashCode, NULL);
+        else
+          insert(rootBT, hashCode);
 
-            showHashTable(h1);
-        }     
+        contadorNodes++;
+        // end of our binary tree stuff stuff
     }
     fclose(fp);
-    printf("Finished!\n");
+
     // report
     switch(opt)
     {

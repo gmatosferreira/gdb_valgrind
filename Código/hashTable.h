@@ -61,7 +61,7 @@ linkedList *createLinkedList(char *key, int index)
 	d->counter = 1;
 	d->firstIndex = index;
 	d->lastIndex = index;
-	d->key = key;
+	d->key = strdup(key);
 	d->maxDistance = 0;
 	d->minDistance = 10000000;
 	d->sumIndex = index;
@@ -80,7 +80,7 @@ int addLinkedList(char *key, int index, linkedList **root)
 	bool similar = false; //true if exists dataItem with the same key, at the end of the while cycle
 	do
 	{
-		if (strcasecmp(analising->data->key, key) == 0) //if keys are equal
+		if (strcasecmp(analising->data->key, key) == 0) //if keys are equal (doesn't distinguish capital letters from lower case)
 		{
 			similar = true;
 			break;
@@ -107,19 +107,20 @@ int addLinkedList(char *key, int index, linkedList **root)
 		if(analising->data->firstIndex>index)
 			analising->data->firstIndex = index; //change first index
 		//make node closer to the beggining of the linkedList (one node closer)
-		if(analising->prev!=analising){ //If analising isn't the only the node of the linkedList
+		if(analising->prev!=analising && analising!=*root){ //If analising isn't the only the node of the linkedList, nor the root
 			linkedList *tempPrev=analising->prev->prev;
 			if(analising->next!=NULL)
 				analising->next->prev=analising->prev;
+			else
+				(*root)->prev=analising->prev;
 			if(analising->prev->prev->next!=NULL)
 				analising->prev->prev->next=analising;
 			analising->prev->next=analising->next;
 			analising->prev->prev=analising;
 			analising->next=analising->prev;
 			analising->prev=tempPrev;
-			if(analising->next==*root){ //If the previous node (now next) is the root
+			if(analising->next==*root) //If the previous node (now next) is the root
 				*root=analising;
-			}
 		}
 	}
 	else
@@ -143,6 +144,7 @@ void showLinkedList(linkedList *link)
 		printf("Prev: %p\n", link->prev);
 		printf("Next: %p\n", link->next);
 		printf("Data: ");
+		showDataItem(link->data);
 		link = link->next;
 	}
 }
