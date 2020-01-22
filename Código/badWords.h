@@ -79,7 +79,10 @@ void badWord(char *s){
     int i, j;
     for(i=j=0; s[i]!='\0'; i++){
         if(isalnum(s[i])!=0 || (ispunct(s[i]) && isalpha(s[i+1]))!=0){
-            s[j++]=s[i];
+            if(s[i]>=65 && s[i]<=92) //Convert upper to lower case
+                s[j++]=s[i]+32;
+            else
+                s[j++]=s[i];            
         }
     }
     s[j]='\0';
