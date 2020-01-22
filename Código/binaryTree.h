@@ -2,93 +2,77 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct nodeBT { 
-    // data[int, int]=[hash da palavra, ocorrencias da palavra]
-    int palavra;
-    int contador; 
-    struct nodeBT* left; 
-    struct nodeBT* right; 
-    struct nodeBT* parent; 
-} nodeBT; 
+//
+// Custom ordered binary tree implementation
+//
 
-nodeBT* searchednodeBT=NULL;
-void searchnodeBT(nodeBT* roott, int palavra){
-    if(roott != NULL){
-        if(roott->palavra == palavra){
-            searchednodeBT=roott;
-        }else{
-            searchednodeBT=NULL;
-            if(palavra <= roott->palavra){
-                searchnodeBT(roott->left, palavra);
-            }else{
-                searchnodeBT(roott->right, palavra);
-            }
-        }
-    }
+typedef struct node
+{
+  char *word;
+  long count;
+  struct node *left;
+  struct node *right;
+}
+node;
+
+static node *new_node(char *word)
+{
+  node *n = (node *)malloc(sizeof(node));
+  n->word = strdup(word);	//pointer to a null-terminated byte string,memory is obtained dynamically using malloc
+  n->count = 1;
+  printf("|++|");
+  n->left = NULL;
+  n->right = NULL;
+  return n;
 }
 
-int minValue(nodeBT* n){ 
-    nodeBT* current = n; 
-
-    while (current->left != NULL) { 
-        current = current->left; 
-    } 
-    return(current->palavra); 
+static node *add_word(node *root,char *word)
+{
+  if(root == NULL)
+    return new_node(word);
+  node *n = root;
+  while(1)
+  {
+    int c = strcasecmp(word,n->word);
+    printf("|%d| ",c);
+    if     (c <  0) { if(n->left  == NULL) { n->left  = new_node(word); return root; } else n = n->left;  }
+    else if(c == 0) {                                       n->count++; printf("|%s|",n->word); return root;                      }
+    else            { if(n->right == NULL) { n->right = new_node(word); return root; } else n = n->right; }
+  }
 }
 
-nodeBT* newnodeBT(int palavra, nodeBT* parent){
-    nodeBT* n = (nodeBT*)malloc(sizeof(nodeBT)); 
-    //n->data = data; 
-    n->palavra = palavra;
-    n->contador = 1;  
-    n->left = NULL; 
-    n->right = NULL;
-    n->parent = parent;
-    return(n); 
-} 
-
-void printTree(nodeBT* root){
-    if(root != NULL){
-        printTree(root->left);
-        printf("%d - %d\n", root->palavra, root->contador);
-        printTree(root->right);
-    }
+static void free_tree(node *n)
+{
+  if(n != NULL)
+  {
+    free_tree(n->left);
+    free_tree(n->right);
+    free(n->word);  //ALTERADO (Memory Leak): faltava libertar este ponteiro
+    free(n);	   //faltava ainda libertar a memória alocada para a criação do nó
+		   // Usamos a função free ja existente do C pq a alocação de memória foi feita com malloc
+  }
 }
 
-nodeBT* insert(nodeBT* nodeBT, int palavra){
-    if (nodeBT != NULL) { 
-        searchnodeBT(nodeBT, palavra);
-        if(searchednodeBT!=NULL){
-            searchednodeBT->contador=searchednodeBT->contador+1;
-            return searchednodeBT;
-        }else{
-            if (palavra <= nodeBT->palavra){  
-                nodeBT->left  = insert(nodeBT->left, palavra); 
-                nodeBT->left->parent=nodeBT;
-            }else{
-                nodeBT->right = insert(nodeBT->right, palavra); 
-                nodeBT->right->parent=nodeBT;
-            }
-            return nodeBT; 
-        } 
-    }else{
-        return(newnodeBT(palavra, NULL)); 
-    }
-} 
+//
+// Ordered binary tree query (recursive) functions
+//
 
-  
-/*int main(){ 
-    int data[2];
-    nodeBT *root = newnodeBT(2345235, NULL);   
-    root->left = newnodeBT(2344533, root); 
-    root->right = newnodeBT(3545347, root); 
-    root->right->right = newnodeBT(756745, root->left); 
-    
-    //a inserção é feita com (raiz, valor)
-    // no caso de o valor já existir, então incrementa 1
-    insert(root, 756745);
-    insert(root, 435643);                                              
+static long count_all_words(node *n)
+{
+  return(n == NULL) ? 0 : count_all_words(n->left) + n->count + count_all_words(n->right);
+}
 
-    printTree(root);
-    return 0; 
-}*/
+static long count_different_words(node *n)
+{
+  return(n == NULL) ? 0 : count_different_words(n->left) + 1 + count_different_words(n->right);
+}
+
+static void list_words(node *n)
+{
+// ALTERADO: condição de paragem para quando o ponteiro for nulo, de modo a que não tente aceder a memória fora da reservada para o programa 
+	if(n != NULL){  
+    		list_words(n->left);
+		printf("%6ld %s\n",n->count,n->word);
+    		list_words(n->right);
+	}
+}
