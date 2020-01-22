@@ -17,6 +17,7 @@ unsigned int hash_function(const char *str, unsigned int s)
 	crc = 0xAED02019u; // initial value (chosen arbitrarily)
 	while (*str != '\0')
 		crc = (crc >> 8) ^ table[crc & 0xFFu] ^ ((unsigned int)*str++ << 24);
+	printf("...%d...",crc%s);
 	return crc % s;
 }
 
@@ -53,6 +54,7 @@ linkedList *createLinkedList(char *key, int index);
 int addLinkedList(char *key, int index, linkedList **root);
 void showLinkedList(linkedList *link);
 dataItem *getLinkedList(char *key, linkedList *link);
+static long countAllWordsLLNode(linkedList *link);
 
 linkedList *createLinkedList(char *key, int index)
 {
@@ -72,30 +74,19 @@ linkedList *createLinkedList(char *key, int index)
 	return l;
 }
 
+linkedList* checkSimilar(char *key, linkedList *ll){
+	if(ll==NULL) return ll;
+	else return (strcasecmp(key,ll->data->key)==0) ? ll : checkSimilar(key,ll->next);
+}
+
 int addLinkedList(char *key, int index, linkedList **root)
 {
-	linkedList *analising = *root;
-
-	//check for dataItem with the same key at the linked list
-	bool similar = false; //true if exists dataItem with the same key, at the end of the while cycle
-	do
-	{
-		if (strcasecmp(analising->data->key, key) == 0) //if keys are equal (doesn't distinguish capital letters from lower case)
-		{
-			similar = true;
-			break;
-		}
-		else
-		{
-			analising = analising->next;
-		}
-
-	} while (analising != NULL);
+	linkedList *analising = checkSimilar(key,*root);
 
 	//if the key already exists, update properties, otherwise, create a new node to the linkedList
-	if (similar)
+	if (analising!=NULL)
 	{
-		analising->data->counter++;						   //increment counter
+		analising->data->counter+=1;						   //increment counter
 		int distance = index - analising->data->lastIndex; //compute distance from last index
 		//update min and max distances
 		if (analising->data->minDistance > distance)
@@ -122,6 +113,7 @@ int addLinkedList(char *key, int index, linkedList **root)
 			if(analising->next==*root) //If the previous node (now next) is the root
 				*root=analising;
 		}
+		printf("SIMILARRRR\t");
 	}
 	else
 	{
@@ -132,7 +124,7 @@ int addLinkedList(char *key, int index, linkedList **root)
 							  //l->next=NULL;
 	}
 
-	return similar; //Returns 1 if key already existed and updated, and 0 if it didn't and a new node was created
+	return analising!=NULL; //Returns 1 if key already existed and updated, and 0 if it didn't and a new node was created
 
 }
 
@@ -153,13 +145,17 @@ dataItem *getLinkedList(char *key, linkedList *link)
 {
 	while (link != NULL)
 	{
-		if (strcmp(link->data->key, key) == 0)
+		if (strcasecmp(link->data->key, key) == 0)
 		{
 			return link->data;
 		}
 	}
 
 	return NULL;
+}
+
+static long countAllWordsLLNode(linkedList *link){
+	return(link==NULL)? 0: (long)link->data->counter + countAllWordsLLNode(link->next);
 }
 
 //HashTable implementation
@@ -174,10 +170,11 @@ typedef struct hashTable
 //Functions that will be implemented for this structure
 hashTable *createHashTable(int size);
 void doubleHashTable(hashTable *hash);
-void addHashTable(char *key, int keyIndex, hashTable *hash);
+//void addHashTable(char *key, int keyIndex, hashTable *hash);
 void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash);
 dataItem *getHashTable(char *key, hashTable *hash);
 void showHashTable(hashTable *ht);
+static long countAllWordsHashTable(hashTable *ht);
 
 
 hashTable *createHashTable(int size)
@@ -192,6 +189,7 @@ hashTable *createHashTable(int size)
 
 void doubleHashTable(hashTable *hash)
 {
+	//printf("DOUBLEEEE\n");
 	//Get data from the "old" hashTable
 	linkedList **tempTable=hash->table;
 	int tempSize=hash->size;
@@ -214,11 +212,11 @@ void doubleHashTable(hashTable *hash)
 				tempLinkedList=nextLinkedList;
 			}
 		}
-	}
-	
+	}	
 }
 
-void addHashTable(char *key, int keyIndex, hashTable *hash)
+static int cteste=0;
+void addHashTable(char *key, int keyIndex, hashTable *hash, long int cc)
 {
 	if (hash->maxElements == hash->addedElements) //If this elemnt will exceed max, double size
 	{
@@ -229,13 +227,19 @@ void addHashTable(char *key, int keyIndex, hashTable *hash)
 	{
 		hash->table[index]=createLinkedList(key, keyIndex);
 		hash->addedElements++;
+		printf("++ ");
 	}
 	else //Add element to linked list
 	{
 		int updatedElement = addLinkedList(key, keyIndex, &hash->table[index]);
-		if(!updatedElement)
+		if(!updatedElement){
 			hash->addedElements++;
+			printf("++ ");
+		}
 	}
+	printf("%d (%ldH) %ldB (%dH) /%s/\n",++cteste,countAllWordsHashTable(hash),cc,hash->addedElements,key);
+	assert(cteste==countAllWordsHashTable(hash));
+	//assert(cc==hash->addedElements);
 }
 
 void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash)
@@ -292,4 +296,13 @@ void showHashTable(hashTable *ht)
 		}
         printf("\n");
 	}
+}
+
+static long countAllWordsHashTable(hashTable *ht)
+{
+	long c=0;
+	for(int i=0;i<ht->size;i++){
+		c+=countAllWordsLLNode(ht->table[i]);
+	}
+	return c;
 }
