@@ -1,5 +1,6 @@
 
 
+//Retirada dos slides teóricos
 unsigned int hash_function(const char *str, unsigned int s)
 { //returns the hashcode of *str between 0 and s
 	static unsigned int table[256];
@@ -17,9 +18,45 @@ unsigned int hash_function(const char *str, unsigned int s)
 	crc = 0xAED02019u; // initial value (chosen arbitrarily)
 	while (*str != '\0')
 		crc = (crc >> 8) ^ table[crc & 0xFFu] ^ ((unsigned int)*str++ << 24);
-	printf("...%d...",crc%s);
 	return crc % s;
 }
+
+//djb2
+/*unsigned int hash_function(const char *str, unsigned int s)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c;
+
+    return hash%s;
+}*/
+
+//sdbm
+/*unsigned int hash_function(const char *str, unsigned int s)
+{
+    unsigned long hash = 0;
+    int c;
+
+    while (c = *str++)
+        hash = c + (hash << 6) + (hash << 16) - hash;
+
+    return hash%s;
+}*/
+
+//lose lose
+/*unsigned int hash_function(const char *str, unsigned int s)
+{
+	unsigned int hash = 0;
+	int c;
+
+	while (c = *str++)
+		hash += c;
+
+	return hash%s;
+}*/
+
 
 // Data item implementation
 typedef struct dataItem
@@ -33,12 +70,23 @@ typedef struct dataItem
 	int minDistance;
 } dataItem;
 
-void showDataItem(dataItem *dt)
+//Functions that will be implemented for this structure
+static void showDataItem(dataItem *dt);
+static void free_di(dataItem *dt);
+
+static void showDataItem(dataItem *dt)
 {
 	if (dt != NULL)
 		printf("dataItem witk key %s, counter %d, firstIndex %d, lastIndex %d, sumIndex %d, maxDistance %d and minDistance %d.\n", dt->key, dt->counter, dt->firstIndex, dt->lastIndex, dt->sumIndex, dt->maxDistance, dt->minDistance);
 	else
 		printf("NULL\n");
+}
+
+static void free_di(dataItem *dt){
+	if(dt!=NULL){
+		free(dt->key);
+		free(dt);
+	}
 }
 
 //Linked list implementation
@@ -50,13 +98,14 @@ typedef struct linkedList
 } linkedList;
 
 //Functions that will be implemented for this structure
-linkedList *createLinkedList(char *key, int index);
-int addLinkedList(char *key, int index, linkedList **root);
-void showLinkedList(linkedList *link);
-dataItem *getLinkedList(char *key, linkedList *link);
+static linkedList *createLinkedList(char *key, int index);
+static int addLinkedList(char *key, int index, linkedList **root);
+static void showLinkedList(linkedList *link);
+static dataItem *getLinkedList(char *key, linkedList *link);
 static long countAllWordsLLNode(linkedList *link);
+static void free_ll(linkedList *ll);
 
-linkedList *createLinkedList(char *key, int index)
+static linkedList *createLinkedList(char *key, int index)
 {
 	//inicialize dataItem
 	dataItem *d = malloc(sizeof(dataItem));
@@ -74,12 +123,12 @@ linkedList *createLinkedList(char *key, int index)
 	return l;
 }
 
-linkedList* checkSimilar(char *key, linkedList *ll){
+static linkedList* checkSimilar(char *key, linkedList *ll){
 	if(ll==NULL) return ll;
 	else return (strcasecmp(key,ll->data->key)==0) ? ll : checkSimilar(key,ll->next);
 }
 
-int addLinkedList(char *key, int index, linkedList **root)
+static int addLinkedList(char *key, int index, linkedList **root)
 {
 	linkedList *analising = checkSimilar(key,*root);
 
@@ -113,7 +162,6 @@ int addLinkedList(char *key, int index, linkedList **root)
 			if(analising->next==*root) //If the previous node (now next) is the root
 				*root=analising;
 		}
-		printf("SIMILARRRR\t");
 	}
 	else
 	{
@@ -128,7 +176,7 @@ int addLinkedList(char *key, int index, linkedList **root)
 
 }
 
-void showLinkedList(linkedList *link)
+static void showLinkedList(linkedList *link)
 { //link=root
 	while (link != NULL)
 	{
@@ -141,7 +189,7 @@ void showLinkedList(linkedList *link)
 	}
 }
 
-dataItem *getLinkedList(char *key, linkedList *link)
+static dataItem *getLinkedList(char *key, linkedList *link)
 {
 	while (link != NULL)
 	{
@@ -158,6 +206,18 @@ static long countAllWordsLLNode(linkedList *link){
 	return(link==NULL)? 0: (long)link->data->counter + countAllWordsLLNode(link->next);
 }
 
+static int countNodes(linkedList *link){
+	return(link==NULL)? 0 : 1 + countNodes(link->next);
+}
+
+static void free_ll(linkedList *ll){
+	if(ll!=NULL){
+		free_ll(ll->next);
+		free_di(ll->data);
+		free(ll);
+	}
+}
+
 //HashTable implementation
 typedef struct hashTable
 {
@@ -168,16 +228,18 @@ typedef struct hashTable
 } hashTable;
 
 //Functions that will be implemented for this structure
-hashTable *createHashTable(int size);
-void doubleHashTable(hashTable *hash);
-//void addHashTable(char *key, int keyIndex, hashTable *hash);
-void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash);
-dataItem *getHashTable(char *key, hashTable *hash);
-void showHashTable(hashTable *ht);
+static hashTable *createHashTable(int size);
+static void doubleHashTable(hashTable *hash);
+static void addHashTable(char *key, int keyIndex, hashTable *hash);
+static void addHashTableNoDouble(char *key, int keyIndex, hashTable *hash);
+static void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash);
+static dataItem *getHashTable(char *key, hashTable *hash);
+static void showHashTable(hashTable *ht);
 static long countAllWordsHashTable(hashTable *ht);
+static void free_ht(hashTable *ht);
 
 
-hashTable *createHashTable(int size)
+static hashTable *createHashTable(int size)
 {
 	hashTable *ht = malloc(sizeof(hashTable));
 	ht->table = malloc(sizeof(linkedList*)*size); //Create table;
@@ -187,9 +249,8 @@ hashTable *createHashTable(int size)
 	return ht;
 }
 
-void doubleHashTable(hashTable *hash)
+static void doubleHashTable(hashTable *hash)
 {
-	//printf("DOUBLEEEE\n");
 	//Get data from the "old" hashTable
 	linkedList **tempTable=hash->table;
 	int tempSize=hash->size;
@@ -215,8 +276,7 @@ void doubleHashTable(hashTable *hash)
 	}	
 }
 
-static int cteste=0;
-void addHashTable(char *key, int keyIndex, hashTable *hash, long int cc)
+static void addHashTable(char *key, int keyIndex, hashTable *hash)
 {
 	if (hash->maxElements == hash->addedElements) //If this elemnt will exceed max, double size
 	{
@@ -227,22 +287,32 @@ void addHashTable(char *key, int keyIndex, hashTable *hash, long int cc)
 	{
 		hash->table[index]=createLinkedList(key, keyIndex);
 		hash->addedElements++;
-		printf("++ ");
 	}
 	else //Add element to linked list
 	{
 		int updatedElement = addLinkedList(key, keyIndex, &hash->table[index]);
-		if(!updatedElement){
+		if(!updatedElement)
 			hash->addedElements++;
-			printf("++ ");
-		}
 	}
-	printf("%d (%ldH) %ldB (%dH) /%s/\n",++cteste,countAllWordsHashTable(hash),cc,hash->addedElements,key);
-	assert(cteste==countAllWordsHashTable(hash));
-	//assert(cc==hash->addedElements);
 }
 
-void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash)
+static void addHashTableNoDouble(char *key, int keyIndex, hashTable *hash)
+{
+	int index = hash_function(key, hash->size); //Compute index of the key
+	if (hash->table[index] == NULL)				//Create linked list
+	{
+		hash->table[index]=createLinkedList(key, keyIndex);
+		hash->addedElements++;
+	}
+	else //Add element to linked list
+	{
+		int updatedElement = addLinkedList(key, keyIndex, &hash->table[index]);
+		if(!updatedElement)
+			hash->addedElements++;
+	}
+}
+
+static void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash)
 { 
 	//Add dataItem to hashTable without need to check if it already exists (auxiliates doubleHashTable())
 
@@ -266,7 +336,7 @@ void addLinkListNodeToHashTable (linkedList *ll, hashTable *hash)
 
 }
 
-dataItem *getHashTable(char *key, hashTable *hash)
+static dataItem *getHashTable(char *key, hashTable *hash)
 {
 	int index = hash_function(key, hash->size); //Compute index of the key
 
@@ -280,7 +350,7 @@ dataItem *getHashTable(char *key, hashTable *hash)
 	}
 }
 
-void showHashTable(hashTable *ht)
+static void showHashTable(hashTable *ht)
 {
 	for (int i = 0; i < ht->size; i++)
 	{
@@ -305,4 +375,11 @@ static long countAllWordsHashTable(hashTable *ht)
 		c+=countAllWordsLLNode(ht->table[i]);
 	}
 	return c;
+}
+
+static void free_ht(hashTable *ht){
+	for(int i=0;i<ht->size;i++){
+		free_ll(ht->table[i]);
+	}
+	free(ht);
 }

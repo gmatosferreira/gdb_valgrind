@@ -20,7 +20,6 @@ static node *new_node(char *word)
   node *n = (node *)malloc(sizeof(node));
   n->word = strdup(word);	//pointer to a null-terminated byte string,memory is obtained dynamically using malloc
   n->count = 1;
-  printf("|++|");
   n->left = NULL;
   n->right = NULL;
   return n;
@@ -34,10 +33,23 @@ static node *add_word(node *root,char *word)
   while(1)
   {
     int c = strcasecmp(word,n->word);
-    printf("|%d| ",c);
     if     (c <  0) { if(n->left  == NULL) { n->left  = new_node(word); return root; } else n = n->left;  }
-    else if(c == 0) {                                       n->count++; printf("|%s|",n->word); return root;                      }
+    else if(c == 0) {                                       n->count++; return root;                      }
     else            { if(n->right == NULL) { n->right = new_node(word); return root; } else n = n->right; }
+  }
+}
+
+static node *get_word(node *root,char *word)
+{
+  if(root == NULL)
+    return NULL;
+  node *n = root;
+  while(1)
+  {
+    int c = strcasecmp(word,n->word);
+    if     (c <  0) { if(n->left  == NULL) { return NULL; } else n = n->left;  }
+    else if(c == 0) { return n;                                                }
+    else            { if(n->right == NULL) { return NULL; } else n = n->right; }
   }
 }
 
@@ -71,8 +83,8 @@ static void list_words(node *n)
 {
 // ALTERADO: condição de paragem para quando o ponteiro for nulo, de modo a que não tente aceder a memória fora da reservada para o programa 
 	if(n != NULL){  
-    		list_words(n->left);
+    list_words(n->left);
 		printf("%6ld %s\n",n->count,n->word);
-    		list_words(n->right);
+    list_words(n->right);
 	}
 }
